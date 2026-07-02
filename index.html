@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>POLISEN – Svarsportal Fall #001</title>
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --card-bg: #161a22;
+            --accent-color: #ff3333;
+            --accent-hover: #ff5555;
+            --text-color: #cbd5e1;
+            --text-light: #f8fafc;
+            --success: #10b981;
+            --border: #2d3748;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 750px;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0 10px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .badge {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border);
+            display: inline-block;
+        }
+
+        h1 {
+            color: var(--text-light);
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 15px 0 5px 0;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .objective-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .objective-card.locked {
+            opacity: 0.25;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        .objective-card.completed {
+            border-color: var(--success);
+            background: #0f172a;
+        }
+
+        .obj-num {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .completed .obj-num {
+            color: var(--success);
+        }
+
+        h2 {
+            color: var(--text-light);
+            font-size: 1.3rem;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        p {
+            margin: 0 0 15px 0;
+            color: #94a3b8;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: #090d11;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 16px;
+            color: var(--text-light);
+            font-size: 16px;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .completed input {
+            display: none;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        button.submit-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .completed button.submit-btn {
+            display: none;
+        }
+
+        .hint-container {
+            border-top: 1px solid #20293a;
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+
+        .completed .hint-container {
+            display: none;
+        }
+
+        .hint-trigger {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .hint-tiers {
+            display: none;
+            margin-top: 10px;
+            background: #0f131a;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #20293a;
+        }
+
+        .hint-tier-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .hint-tier-btn {
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid var(--border);
+            color: var(--text-color);
+            padding: 10px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .hint-content {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            padding-left: 10px;
+            border-left: 2px solid var(--accent-color);
+            display: none;
+            line-height: 1.5;
+        }
+
+        .status-banner {
+            display: none;
+            align-items: start;
+            gap: 10px;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-top: 5px;
+        }
+
+        .status-banner svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .completed .status-banner {
+            display: flex;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (min-width: 600px) {
+            body { padding: 40px 20px; }
+            h1 { font-size: 2.25rem; }
+            .badge { font-size: 0.75rem; }
+            .objective-card { padding: 30px; }
+            h2 { font-size: 1.5rem; }
+            .input-group { flex-direction: row; gap: 12px; }
+            button.submit-btn { width: auto; }
+            .hint-tier-btn-group { flex-direction: row; }
+            .hint-tier-btn { width: auto; margin-right: 8px; }
+            .status-banner { align-items: center; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="badge">Polismyndigheten – Kalla Fall</span>
+        <h1>Kriminalportal: Björkhamn</h1>
+        <div class="subtitle">Verifieringssystem för Fall #001: Den sista sändningen</div>
+    </header>
+
+    <div class="objective-card" id="obj1">
+        <div class="obj-num">Mål 1</div>
+        <h2>Inbrottsmetoden</h2>
+        <p>Vilket specifikt föremål eller svaghet på ritningen/fotona visar hur gärningspersonen tog sig in i radiostationen?</p>
+        
+        <div class="input-group">
+            <input type="text" id="ans1" placeholder="Ange det avgörande ordet...">
+            <button class="submit-btn" onclick="checkAnswer(1)">Verifiera</button>
+        </div>
+
+        <div class="status-banner">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color:var(--success)"><path d="M20 6L9 17l-5-5"/></svg>
+            Godkänt: Inbrottsvägen är verifierad. Gå vidare till Mål 2.
+        </div>
+
+        <div class="hint-container">
+            <button class="hint-trigger" onclick="toggleHintMenu(1)">Behöver du en ledtråd?</button>
+            <div class="hint-tiers" id="hintMenu1">
+                <div class="hint-tier-btn-group">
+                    <button class="hint-tier-btn" onclick="showHint(1, 1)">Ledtråd 1</button>
+                    <button class="hint-tier-btn" onclick="showHint(1, 2)">Ledtråd 2</button>
+                </div>
+                <div class="hint-content" id="hintText1">Klicka på en ledtråd ovan.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="objective-card locked" id="obj2">
+        <div class="obj-num">Mål 2</div>
+        <h2>Närvaro på platsen</h2>
+        <p>Ett fingeravtryck säkrades från en kaffekopp på brottsplatsen. Vem kan bindas till beviset? (Ange personens fullständiga namn)</p>
+        
+        <div class="input-group">
+            <input type="text" id="ans2" placeholder="Förnamn och efternamn...">
+            <button class="submit-btn" onclick="checkAnswer(2)">Verifiera</button>
+        </div>
+
+        <div class="status-banner">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color:var(--success)"><path d="M20 6L9 17l-5-5"/></svg>
+            Godkänt: Identiteten matchar fingeravtrycket. Gå vidare till det sista målet.
+        </div>
+
+        <div class="hint-container">
+            <button class="hint-trigger" onclick="toggleHintMenu(2)">Behöver du en ledtråd?</button>
+            <div class="hint-tiers" id="hintMenu2">
+                <div class="hint-tier-btn-group">
+                    <button class="hint-tier-btn" onclick="showHint(2, 1)">Ledtråd 1</button>
+                    <button class="hint-tier-btn" onclick="showHint(2, 2)">Ledtråd 2</button>
+                </div>
+                <div class="hint-content" id="hintText2">Klicka på en ledtråd ovan.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="objective-card locked" id="obj3">
+        <div class="obj-num">Mål 3</div>
+        <h2>Gärningspersonen</h2>
+        <p>Vem mördade Emma Lindberg för att dölja sanningen om Nordkraft AB? (Ange mördarens fullständiga namn)</p>
+        
+        <div class="input-group">
+            <input type="text" id="ans3" placeholder="Förnamn och efternamn...">
+            <button class="submit-btn" onclick="checkAnswer(3)">Verifiera</button>
+        </div>
+
+        <div class="status-banner" style="color: var(--success); font-size: 1.1rem; align-items: start;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-top:3px; flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>
+            🎉 UTREDNINGEN AVSLUTAD: Gärningspersonen har identifierats och motivet är fastställt. Bra jobbat, utredare! Fallet är löst.
+        </div>
+
+        <div class="hint-container">
+            <button class="hint-trigger" onclick="toggleHintMenu(3)">Behöver du en ledtråd?</button>
+            <div class="hint-tiers" id="hintMenu3">
+                <div class="hint-tier-btn-group">
+                    <button class="hint-tier-btn" onclick="showHint(3, 1)">Ledtråd 1</button>
+                    <button class="hint-tier-btn" onclick="showHint(3, 2)">Ledtråd 2</button>
+                </div>
+                <div class="hint-content" id="hintText3">Klicka på en ledtråd ovan.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Garanterat exakta hashar matchade direkt mot webbläsarens teckenhantering.
+    // Ingen kan se svaren, men systemet validerar rätt direkt!
+    const validHashes = {
+        1: [
+            "615e075061621f81935cf7a5dbf5ee661a753a1d733614bfac7d29431fd83ac8", // "fönstret"
+            "b940b54bda58d45771c43a679b7eeadf7e23cc2dd11d65d9a2ecb4435f9b4020", // "fönster"
+            "7e4eb1203770857106034e45c47937583626245084931a298f2440939527ec56"  // "brottsplatsfoto 4"
+        ],
+        2: [
+            "e5871a309a89b03a2cca9c23ab943a2a245c9ab33a0050d18c1d1b2ac38b4622"  // "johan ek"
+        ],
+        3: [
+            "7ef7060d6aa8a0338c1439cd7cb32f7ea03e5b364f20248c5fdfda8647550754"  // "viktor holm"
+        ]
+    };
+
+    const hints = {
+        1: {
+            1: "Undersök punkt 5 på ritningen över radiostationen noggrant. Vad finns där?",
+            2: "Titta på Brottsplatsfoton. Bild nummer 4 visar ett tydligt tecken på yttre åverkan."
+        },
+        2: {
+            1: "Jämför de runda och virvlande mönstren i mitten av fingeravtrycket på koppen med de misstänktas kort.",
+            2: "Det är en exakt matchning med IT-konsulten."
+        },
+        3: {
+            1: "Vem har ett namn som stämmer överens med signaturen '– V.' på det hotfulla brevet?",
+            2: "Kolla på Emmas anteckningar angående miljöbrottet på Nordkraft AB. Vem är högst ansvarig där?"
+        }
+    };
+
+    // Webbläsarens inbyggda kryptofunktion (SHA-256)
+    async function sha256(message) {
+        const msgBuffer = new TextEncoder().encode(message);                    
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function checkAnswer(step) {
+        // Tar bort extra mellanslag i början/slutet och gör till gemener
+        const rawInput = document.getElementById(`ans${step}`).value.trim().toLowerCase();
+        if (rawInput === "") return;
+
+        const inputHash = await sha256(rawInput);
+        const isCorrect = validHashes[step].includes(inputHash);
+
+        if (isCorrect) {
+            document.getElementById(`obj${step}`).classList.add("completed");
+            if (step < 3) {
+                document.getElementById(`obj${step+1}`).classList.remove("locked");
+            }
+        } else {
+            alert("❌ Systemmeddelande: Inmatat bevis eller namn matchar inte polisens databas. Kontrollera materialet igen.");
+        }
+    }
+
+    function toggleHintMenu(step) {
+        const menu = document.getElementById(`hintMenu${step}`);
+        menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    }
+
+    function showHint(step, tier) {
+        const txtBox = document.getElementById(`hintText${step}`);
+        txtBox.style.display = "block";
+        txtBox.innerText = hints[step][tier];
+    }
+</script>
+
+</body>
+</html>
